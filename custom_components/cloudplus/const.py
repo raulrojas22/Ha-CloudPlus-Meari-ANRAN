@@ -22,6 +22,7 @@ DEFAULT_APP_PROFILE = "cloudedge"
 APP_PROFILE_NAMES = {
     "cloudedge": "CloudEdge",
     "cloudplus": "CloudPlus / CloudHome",
+    "anran": "ANRAN",
     "iegeek": "ieGeek",
     "arenti": "Arenti",
 }

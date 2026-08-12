@@ -65,6 +65,11 @@ class AppProfileConfig:
 
 APP_PROFILE_CONFIG: dict[str, AppProfileConfig] = {
     "cloudplus": AppProfileConfig("77", "6.0.1", "1029", REDIRECT_URL, "77"),
+    # ANRAN accounts still authenticate with the legacy CloudPlus wire
+    # identity.  Keeping this as a separate profile is important: changing
+    # CloudPlus back to these values would regress accounts created by the
+    # current CloudPlus / CloudHome application.
+    "anran": AppProfileConfig("77", "5.9.2", "1024", REDIRECT_URL, "77"),
     "cloudedge": AppProfileConfig(
         "8",
         "6.1.4",
