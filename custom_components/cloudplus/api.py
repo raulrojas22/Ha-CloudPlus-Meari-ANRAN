@@ -61,15 +61,23 @@ class AppProfileConfig:
     signaling_app_ver: str = ""
     encrypted_login: bool = False
     vvp_stream_flag: int = 1
+    phone_type: str = PHONE_TYPE
+    lng_type: str = "en"
 
 
 APP_PROFILE_CONFIG: dict[str, AppProfileConfig] = {
     "cloudplus": AppProfileConfig("77", "6.0.1", "1029", REDIRECT_URL, "77"),
-    # ANRAN accounts still authenticate with the legacy CloudPlus wire
-    # identity.  Keeping this as a separate profile is important: changing
-    # CloudPlus back to these values would regress accounts created by the
-    # current CloudPlus / CloudHome application.
-    "anran": AppProfileConfig("77", "5.9.2", "1024", REDIRECT_URL, "77"),
+    # ANRAN uses its own iOS wire identity. Keeping this as a separate profile
+    # avoids changing CloudPlus / CloudHome authentication behavior.
+    "anran": AppProfileConfig(
+        "84",
+        "6.2.0",
+        "2026071016",
+        REDIRECT_URL,
+        "84",
+        phone_type="i",
+        lng_type="es",
+    ),
     "cloudedge": AppProfileConfig(
         "8",
         "6.1.4",
@@ -288,6 +296,8 @@ class MeariApiClient:
         self._signaling_app_ver = cfg.signaling_app_ver or f"{cfg.app_ver}a16"
         self._encrypted_login = cfg.encrypted_login
         self.vvp_stream_flag = cfg.vvp_stream_flag
+        self._phone_type = cfg.phone_type
+        self._lng_type = cfg.lng_type
 
     def _apply_platform_defaults(self) -> None:
         code = _region_code(self.api_server, self.openapi_server, self.platform_domain)
@@ -365,11 +375,11 @@ class MeariApiClient:
         sign = f"{tz_offset // -3600:+03d}:00"
         ts_str = dt.strftime(f"%Y-%m-%dT%H:%M:%S.{ts % 1000:03d}GMT{sign}")
         params = {
-            "phoneType": PHONE_TYPE,
+            "phoneType": self._phone_type,
             "sourceApp": self._source_app,
             "appVer": self._app_ver,
             "appVerCode": self._app_ver_code,
-            "lngType": "en",
+            "lngType": self._lng_type,
             "t": str(ts),
             "countryCode": self.country_code,
             "phoneCode": self.phone_code,
@@ -450,13 +460,13 @@ class MeariApiClient:
             "nonce": nonce,
             "sign": sign,
             "partnerId": self._partner_id,
-            "phoneType": PHONE_TYPE,
+            "phoneType": self._phone_type,
             "sourceApp": self._source_app,
             "appVer": self._app_ver,
             "appVerCode": self._app_ver_code,
             "countryCode": self.country_code,
             "phoneCode": self.phone_code,
-            "lngType": "en",
+            "lngType": self._lng_type,
             "userAccount": _encode_user_account(
                 self.email,
                 "/ppstrongs/redirect",
@@ -490,13 +500,13 @@ class MeariApiClient:
         ):
             ts = int(time.time() * 1000)
             params = {
-                "phoneType": PHONE_TYPE,
+                "phoneType": self._phone_type,
                 "sourceApp": self._source_app,
                 "appVer": self._app_ver,
                 "appVerCode": self._app_ver_code,
                 "countryCode": self.country_code,
                 "phoneCode": self.phone_code,
-                "lngType": "en",
+                "lngType": self._lng_type,
                 "t": str(ts),
                 "userAccount": _encode_user_account(
                     self.email,

@@ -35,7 +35,7 @@ def _dict_entry(node: ast.AST, key: str) -> ast.AST:
 
 
 class AnranProfileTests(unittest.TestCase):
-    def test_anran_uses_legacy_cloudplus_wire_identity(self) -> None:
+    def test_anran_uses_its_ios_wire_identity(self) -> None:
         profiles = _assignment_value(
             ROOT / "custom_components/cloudplus/api.py", "APP_PROFILE_CONFIG"
         )
@@ -43,8 +43,14 @@ class AnranProfileTests(unittest.TestCase):
         self.assertIsInstance(anran, ast.Call)
         self.assertEqual(
             [ast.literal_eval(arg) for arg in anran.args[:3]],
-            ["77", "5.9.2", "1024"],
+            ["84", "6.2.0", "2026071016"],
         )
+        keyword_values = {
+            keyword.arg: ast.literal_eval(keyword.value)
+            for keyword in anran.keywords
+        }
+        self.assertEqual(keyword_values["phone_type"], "i")
+        self.assertEqual(keyword_values["lng_type"], "es")
 
     def test_anran_is_exposed_in_home_assistant_profile_selector(self) -> None:
         names = _assignment_value(
