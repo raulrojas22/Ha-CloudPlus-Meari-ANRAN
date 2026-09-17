@@ -73,6 +73,12 @@ Human body, Person). Other alarm types (Visitor, Noise, Package, etc.) are
 classified by `motion_event.py` but currently routed only to logs / future
 event sensors.
 
+At `DEBUG` level the listener logs the full raw event under the grep-target
+`MQTT motion raw event:` (truncated to 2000 chars). Use it to see which
+fields a given camera firmware sends — in particular whether the event
+carries an image/clip URL, which would be the only way to get a snapshot of
+the exact motion moment rather than a frame fetched after the camera wakes.
+
 ## Binary sensor semantics
 
 The motion binary sensor is a **pulse**, not a latch. It turns on for any

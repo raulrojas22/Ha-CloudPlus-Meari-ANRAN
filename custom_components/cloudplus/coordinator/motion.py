@@ -363,6 +363,13 @@ class MotionEventListener:
         if not event or not event["is_motion"]:
             return
 
+        # Grep-target: dumps the raw cloud event so we can inspect which fields
+        # (image/clip URLs, timestamps) a given camera firmware actually sends.
+        _LOGGER.debug(
+            "MQTT motion raw event: %s",
+            json.dumps(event["raw"], ensure_ascii=False, default=str)[:2000],
+        )
+
         device_id = event["device_id"]
         license_id = event["license_id"]
         if not device_id and not license_id:
