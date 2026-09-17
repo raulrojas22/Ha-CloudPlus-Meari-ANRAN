@@ -82,4 +82,7 @@ class CloudEdgeMeariCamera(CloudEdgeMeariEntity, Camera):
         if self._coordinator.device_id:
             attrs["device_id"] = self._coordinator.device_id
         attrs["sn_num"] = self._coordinator.device_uuid
+        image_age = self._coordinator.last_image_age
+        if image_age is not None:
+            attrs["image_age"] = round(image_age, 1)
         return attrs

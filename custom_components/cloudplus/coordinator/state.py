@@ -37,6 +37,18 @@ class CoordinatorStateMixin:
         return self._latest_image
 
     @property
+    def last_image_age(self) -> float | None:
+        """Seconds since the last decoded snapshot, or None when unavailable.
+
+        Automations need this to wait for a frame that postdates the motion
+        event: on an unreliable P2P link the cached JPEG can be minutes old,
+        which made AI descriptions describe an empty scene.
+        """
+        if self._latest_image is None or not self._last_image_time:
+            return None
+        return max(0.0, time.time() - self._last_image_time)
+
+    @property
     def motion_type(self) -> str:
         return self._motion_type
 

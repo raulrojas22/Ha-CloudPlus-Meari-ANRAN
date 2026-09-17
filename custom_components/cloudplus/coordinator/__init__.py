@@ -111,6 +111,7 @@ class CloudEdgeMeariCoordinator(CoordinatorStateMixin):
         self._available = False
         self._camera_awake = False
         self._latest_image: bytes | None = None
+        self._last_image_time = 0.0
         self._latest_video_kf: bytes | None = None
         self._snapshot_conversion_enabled = bool(snapshot_conversion_enabled)
         self._snapshot_convert_interval = max(1.0, float(snapshot_min_interval))
@@ -714,6 +715,7 @@ class CloudEdgeMeariCoordinator(CoordinatorStateMixin):
             jpeg = self._video_to_jpeg(codec, payload)
             if jpeg:
                 self._latest_image = jpeg
+                self._last_image_time = time.time()
                 self._fire_update()
         finally:
             self._snapshot_convert_lock.release()

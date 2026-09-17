@@ -58,6 +58,12 @@ IoT entities are gated on `coordinator.supports_iot(feature)` or
 `coordinator.has_iot_code(code)`, so cameras only show the toggles they
 actually implement.
 
+The camera entity exposes an `image_age` attribute: seconds since the cached
+JPEG was last decoded. On an unreliable P2P link that cache can be minutes
+old, so automations should wait for `image_age` to drop before snapshotting
+(otherwise the snapshot — and any AI description of it — shows a stale
+scene).
+
 ## Coordinator
 
 `custom_components/cloudplus/coordinator/` — the per-camera worker. One
