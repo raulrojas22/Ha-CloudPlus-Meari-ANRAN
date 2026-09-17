@@ -16,6 +16,11 @@ CONF_VIDEO_PASSWORD = "video_password"
 CONF_STREAM_QUALITY = "stream_quality"
 
 DEFAULT_MOTION_TIMEOUT = 120
+# How long the motion binary sensor stays on after the last cloud event.
+# Without this the sensor latches on for as long as the camera stays awake
+# (`CONF_MOTION_TIMEOUT`), so a second motion inside that window never fires a
+# state change and automations only trigger once.
+MOTION_HOLD_S = 20.0
 DEFAULT_COUNTRY_CODE = "FR"
 DEFAULT_PHONE_CODE = "33"
 DEFAULT_APP_PROFILE = "cloudedge"

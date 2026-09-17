@@ -13,6 +13,7 @@ from ..const import (
     IOT_CODE_CHARGE_STATUS,
     IOT_CODE_LAMP,
     IOT_CODE_VIDEO_ENCRYPTION,
+    MOTION_HOLD_S,
     PTZ_DIRECTIONS,
 )
 from ..p2p_streamer import (
@@ -291,6 +292,18 @@ class CoordinatorStateMixin:
             self._wake_event.set()
             self._extend_live_deadline()
             self._set_camera_awake(True)
+
+    def _expire_motion(self) -> None:
+        """Drop the motion flag once events stop, without putting the camera to sleep.
+
+        The camera stays awake for `CONF_MOTION_TIMEOUT`; the sensor itself is a
+        shorter pulse so successive motion events produce fresh state changes
+        and automations can trigger again.
+        """
+        if self._motion_detected and (
+            time.monotonic() - self._last_motion_time >= MOTION_HOLD_S
+        ):
+            self._set_motion(False)
 
     @staticmethod
     def _as_int(value: Any) -> int | None:

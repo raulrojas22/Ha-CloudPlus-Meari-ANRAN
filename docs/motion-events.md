@@ -73,6 +73,15 @@ Human body, Person). Other alarm types (Visitor, Noise, Package, etc.) are
 classified by `motion_event.py` but currently routed only to logs / future
 event sensors.
 
+## Binary sensor semantics
+
+The motion binary sensor is a **pulse**, not a latch. It turns on for any
+alarm in `MOTION_ALARM_TYPES` and clears `MOTION_HOLD_S` (20 s) after the last
+event, while the camera itself stays awake for `CONF_MOTION_TIMEOUT`
+(default 120 s). Keeping the two independent matters: if the sensor stayed on
+for the whole awake window, a second motion inside that window would produce no
+state change and automations keyed on `to: "on"` would only ever fire once.
+
 ## Fallback: cloud event polling
 
 Because the MQTT session is regularly evicted whenever the account is also
