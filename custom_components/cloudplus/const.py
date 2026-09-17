@@ -36,6 +36,13 @@ APP_VER = "5.9.2"
 APP_VER_CODE = "1024"
 PHONE_TYPE = "a"
 
+# Transient cloud-side reject (`1023`) that the official apps simply retry. It
+# shows up on event, battery and platform-config requests, so the signed GET
+# client retries it in place instead of failing a whole motion poll.
+TRANSIENT_RESULT_CODE = "1023"
+TRANSIENT_RETRIES = 2
+TRANSIENT_RETRY_DELAY = 0.75
+
 DEFAULT_CA_KEY = "bc29be30292a4309877807e101afbd51"
 DEFAULT_CA_SECRET = "35a69fd1-6527-4566-b190-921f9a651488"
 

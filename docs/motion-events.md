@@ -125,6 +125,15 @@ updates the MQTT credentials used for later reconnects, and resumes polling.
 This prevents an expired token or a wedged HTTPS connection from leaving
 motion delivery permanently stopped until Home Assistant restarts.
 
+Re-authentication is **cooldown-limited** (`REAUTH_COOLDOWN_S`, 5 min): a
+shared account that keeps failing would otherwise re-login on every failed
+cycle, and that login churn is itself a suspected trigger of the cloud-side
+`1023` throttle. Polling cadence is unchanged (`ALARM_POLL_INTERVAL` on
+success, `ALARM_POLL_ERROR_INTERVAL` on failure), so worst-case latency is the
+same as before. The API client additionally retries a `1023` response in place
+(up to `TRANSIENT_RETRIES`, re-signing each attempt) before a request is
+treated as failed — see [protocol.md](protocol.md).
+
 ## Practical guidance
 
 - If MQTT connect logs `Bad user name or password`, low-latency MQTT push is

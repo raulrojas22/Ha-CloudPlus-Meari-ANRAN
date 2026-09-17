@@ -35,6 +35,9 @@ from .const import (
     PHONE_TYPE,
     PTZ_DIRECTIONS,
     REDIRECT_URL,
+    TRANSIENT_RESULT_CODE,
+    TRANSIENT_RETRIES,
+    TRANSIENT_RETRY_DELAY,
     TTID,
 )
 from .url_util import parse_host as _host
@@ -393,15 +396,18 @@ class MeariApiClient:
         return params
 
     def _get(self, path: str, extra_params: dict | None = None) -> dict:
-        params = self._base_params()
-        if extra_params:
-            params.update(extra_params)
-        params = self._sign_params(params)
-        url = self.api_server + path
-        headers = self._ca_headers(path)
-        r = self._http_get(url, params=params, headers=headers)
-        r.raise_for_status()
-        return r.json()
+        # Re-sign and retry the transient `1023` reject.
+        for attempt in range(TRANSIENT_RETRIES + 1):
+            params = self._base_params()
+            params.update(extra_params or {})
+            params = self._sign_params(params)
+            r = self._http_get(self.api_server + path, params=params, headers=self._ca_headers(path))
+            r.raise_for_status()
+            data = r.json()
+            if str(data.get("resultCode", "")) != TRANSIENT_RESULT_CODE or attempt >= TRANSIENT_RETRIES:
+                return data
+            time.sleep(TRANSIENT_RETRY_DELAY)
+        return data
 
     def _post(self, path: str, extra_params: dict | None = None) -> dict:
         params = self._base_params()

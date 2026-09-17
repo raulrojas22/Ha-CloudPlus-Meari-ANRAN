@@ -17,6 +17,11 @@ from ..motion_event import parse_motion_event
 _LOGGER = logging.getLogger(__name__)
 ALARM_POLL_INTERVAL = 15.0
 ALARM_POLL_ERROR_INTERVAL = 60.0
+# Repeated logins for a shared Meari account can themselves trigger the
+# cloud-side throttle (observed resultCode 1023), so cap how often the poller
+# re-authenticates instead of logging in on every failed cycle. Polling cadence
+# is unchanged, so worst-case latency stays where it was.
+REAUTH_COOLDOWN_S = 300.0
 # Cap on remembered event ids so the dedup set can't grow without bound.
 _SEEN_ALARM_CAP = 4000
 
@@ -71,6 +76,7 @@ class MotionEventListener:
         self._seen_alarm_keys: set[tuple[str, str]] = set()
         self._poll_day: str = ""
         self._mqtt_connect_warned = False
+        self._last_reauth: float = -REAUTH_COOLDOWN_S
 
     @property
     def has_callbacks(self) -> bool:
@@ -220,6 +226,10 @@ class MotionEventListener:
             self._stop_poll.wait(wait_s)
 
     def _reauthenticate_api(self) -> bool:
+        now = time.monotonic()
+        if now - self._last_reauth < REAUTH_COOLDOWN_S:
+            return False
+        self._last_reauth = now
         try:
             self._api.login()
         except (OSError, RuntimeError, ValueError, KeyError) as exc:

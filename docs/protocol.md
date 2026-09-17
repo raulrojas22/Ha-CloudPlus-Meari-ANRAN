@@ -23,7 +23,9 @@ ordering, source-idle recovery, wake retries) see [streaming.md](streaming.md).
   requests fetch device lists, IoT config, model values, wake controls and
   OpenAPI credentials.
 - Result code `1023` can appear transiently during discovery. The integration
-  tries the official fallback discovery paths before treating it as fatal.
+  tries the official fallback discovery paths before treating it as fatal, and
+  the signed GET client retries a `1023` in place (up to `TRANSIENT_RETRIES`
+  attempts, re-signing each time) before a request is reported as failed.
 - Battery / "snap" cameras need wake commands before P2P video. The official
   app commonly sends both OpenAPI awaken *and* app remote wake — we do the
   same.
